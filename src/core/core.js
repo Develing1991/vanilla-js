@@ -15,3 +15,16 @@ export class Component {
     // ....
   }
 }
+
+///// Router /////
+function routeRender(routes){
+  
+}
+export function creatRouter(routes) {
+  return function(){
+    window.addEventListener('popstate', () => {
+      routeRender(routes)
+    })
+    routeRender(routes)
+  }
+}

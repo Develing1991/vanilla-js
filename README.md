@@ -1,3 +1,61 @@
+## components/TheHeader.js
+```javascript
+import { Component } from "../core/core";
+
+export default class TheHeader extends Component{
+  constructor(){
+    super({
+      tagName: 'header'
+    })
+  }
+  render(){
+    this.el.innerHTML = /*html*/ `
+      <a href="#/">Main!</a>
+      <a href="#/about">About!</a>
+    `
+    
+  }
+}
+```
+
+## routes/About.js
+```javascript
+import { Component } from "../core/core";
+
+export default class About extends Component{
+  render(){
+    this.el.innerHTML = /*html*/`
+      <h1>About Page!</h1>
+    `
+  }
+}
+```
+
+## routes/Home.js
+```javascript
+import { Component } from "../core/core";
+
+export default class Home extends Component{
+  render(){
+    this.el.innerHTML = /*html*/`
+      <h1>Home Page!</h1>
+    `
+  }
+}
+```
+
+## routes/index.js
+```javascript
+import Home from '../routes/Home'
+import About from '../routes/About'
+import { creatRouter } from '../core/core'
+
+export default creatRouter([
+  {path: '#/', component: Home},
+  {path: '#/about', component: About},
+])
+```
+
 ## core/core.js
 ```javascript
 ///// Component /////
@@ -17,63 +75,45 @@ export class Component {
     // ....
   }
 }
-```
 
-## components/FruitItem.js
-```javascript
-import { Component } from "../core/core";
-
-export default class FruitItem extends Component {
-  constructor(payload){
-    super({
-      tagName: 'li',
-      props: payload.props
+///// Router /////
+function routeRender(routes){
+  
+}
+export function creatRouter(routes) {
+  return function(){
+    window.addEventListener('popstate', () => {
+      routeRender(routes)
     })
-  }
-  render(){
-    this.el.innerHTML = /*html*/`
-      <span>${this.props.name}</span>
-      <span>${this.props.price}</span>
-    `
-    this.el.addEventListener('click', () => {
-      console.log(this.props.name, this.props.price);
-    })
+    routeRender(routes)
   }
 }
 ```
 
 ## App.js
 ```javascript
-import FruitItem from "./components/FruitItem"
+import TheHeader from "./components/TheHeader"
 import { Component } from "./core/core"
 
 export default class App extends Component{
-  constructor(){
-    super({
-      state: {
-        fruits: [
-          { name: 'Apple', price: 1000},
-          { name: 'Banana', price: 2000},
-          { name: 'Cherry', price: 3000},
-        ]
-      }
-    })
-  }
+  
   render() {
-    this.el.innerHTML = /*html*/ `
-      <h1>FRUITS</h1>
-      <ul></ul>
-    `
-    const ulEl = this.el.querySelector('ul')
-    ulEl.append(
-       ...this.state.fruits
-      .map(fruit => new FruitItem({
-        props: {
-          name: fruit.name,
-          price: fruit.price
-        }
-      }).el))
+    const routeView = document.createElement('router-view')
+    this.el.append(
+      new TheHeader().el,
+      routeView
+    )
   }
 }
+```
+
+## Main.js
+```javascript
+import App from './App'
+import router from './routes/index'
+
+const root = document.querySelector('#root')
+root.append(new App().el)
+router()
 ```
 
