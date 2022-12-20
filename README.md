@@ -117,3 +117,5 @@ root.append(new App().el)
 router()
 ```
 
+<img src="https://user-images.githubusercontent.com/54789601/208770303-c0277176-696c-40d6-bd54-7f46957223f4.png">
+
