@@ -1,31 +1,14 @@
-## index.html
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  ...
-  <script src="./src/main.js" defer type="module"></script>
-</head>
-<body>
-  <div id="root"></div>
-</body>
-</html>
-```
-
-## main.js
-```javascript
-import App from './App'
-const root = document.querySelector('#root')
-root.append(new App().el)
-```
-
 ## core/core.js
 ```javascript
 ///// Component /////
 export class Component {
   constructor(payload = {}){
-    const { tagName = 'div' } = payload
+    const { 
+      tagName = 'div',
+      state = {} 
+    } = payload
     this.el = document.createElement(tagName)
+    this.state = state
     this.render()
   }
   render(){
@@ -41,11 +24,26 @@ import { Component } from "./core/core"
 export default class App extends Component{
   constructor(){
     super({
-      tagName: 'h1'
+      state: {
+        inputText: ''
+      }
     })
   }
   render() {
-    this.el.textContent = 'Hello~ Vanilla.js'
+    this.el.classList.add('search')
+    this.el.innerHTML = /*html*/`
+      <input/>
+      <button>Click</button>
+    `
+    const inputEl = this.el.querySelector('input')
+    inputEl.addEventListener('input', () => {
+      this.state.inputText = inputEl.value
+    })
+
+    const buttonEl = this.el.querySelector('button')
+    buttonEl.addEventListener('click', () => {
+      console.log(this.state.inputText);
+    })
   }
 }
 ```
