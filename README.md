@@ -1,18 +1,10 @@
-## routes/About.js
+## store/message.js
 ```javascript
-import { Component } from "../core/core";
+import { Store } from "../core/core";
 
-export default class About extends Component{
-  render(){
-    const { a, b, c} = history.state
-    this.el.innerHTML = /*html*/`
-      <h1>About Page!</h1>
-      <h2>${a}</h2>
-      <h2>${b}</h2>
-      <h2>${c}</h2>
-    `
-  }
-}
+export default new Store({
+  message : 'Hello~'
+})
 ```
 
 ## core/core.js
@@ -21,54 +13,86 @@ export default class About extends Component{
   ...
 
 ///// Router /////
-function routeRender(routes){
-  if(!location.hash){
-    history.replaceState(null, '', '/#/')
+  ...
+
+//// Store /////
+export class Store {
+  constructor(state){
+    this.state = {}
+    this.observers = {}
+    for(const key in state){
+      Object.defineProperty(this.state, key, {
+        get: () => state[key], // state['message']
+        set: (val) => {
+          state[key] = val
+          this.observers[key]()
+          
+        }
+      })
+    }
   }
-  const routerView = document.querySelector('router-view')
-  
-  // http://localhost:1234/#/about?a=123&b=456
-  const [hash, queryString = '' ] = location.hash.split('?')
-  const query = queryString.split('&').reduce((acc, curr) => {
-    const [key, value] = curr.split('=')
-    acc[key] = value
-    return acc
-  }, {})
-  history.replaceState(query, '');
-
-  //  /#\/about\/?$/.test('#/about')
-  const currentRoute = routes.find(route => new RegExp(`${route.path}/?$`).test(hash))
-  routerView.innerHTML = '';
-  routerView.append( new currentRoute.component().el )
-
-  scrollTo(0, 0)
+  subscribe(key, cb) {
+    this.observers[key] = cb
+  }
 }
-export function creatRouter(routes) {
-  return function(){
-    window.addEventListener('popstate', () => {
-      routeRender(routes)
+```
+
+## components/Message.js
+```javascript
+import { Component } from "../core/core";
+import messageStore from "../store/message";
+
+export default class Message extends Component{
+  constructor(){
+    super()
+    messageStore.subscribe('message', () => {
+      this.render()
     })
-    routeRender(routes)
+  }
+  render(){
+    this.el.innerHTML = /*HTML*/`
+      <h2>${messageStore.state.message}</h2>
+    `
+  }
+}
+```
+## components/TextField.js
+```javascript
+import { Component } from "../core/core";
+import messageStore from "../store/message";
+
+export default class TextField extends Component{
+  render(){
+    this.el.innerHTML = /*html*/`
+      <input value="${messageStore.state.message}"> 
+    `
+    const inputEl = this.el.querySelector('input')
+    inputEl.addEventListener('input', () => {
+      //console.log(inputEl.value);
+      messageStore.state.message = inputEl.value // set
+    })
   }
 }
 ```
 
-## index.html
-```html
-<link rel="stylesheet" href="./src/main.css">
+## routes/Home.js
+```javascript
+import { Component } from "../core/core";
+import TextField from "../components/TextField";
+import Message from "../components/Message";
+
+export default class Home extends Component{
+  render(){
+    this.el.innerHTML = /*html*/`
+      <h1>Home Page!</h1>
+    `
+    this.el.append( 
+      new TextField().el
+      ,new Message().el 
+    )
+  
+  }
+}
 ```
 
-## main.css
-```css
-body {
-  height: 3000px;
-}
-
-header {
-  position: fixed;
-  top: 0;
-  width: 100%;
-  background-color: rgba(255, 255, 255, .5);
-}
-```
 
