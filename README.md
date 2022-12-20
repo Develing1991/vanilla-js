@@ -1,12 +1,3 @@
-## store/message.js
-```javascript
-import { Store } from "../core/core";
-
-export default new Store({
-  message : 'Hello~'
-})
-```
-
 ## core/core.js
 ```javascript
 ///// Component /////
@@ -25,52 +16,41 @@ export class Store {
         get: () => state[key], // state['message']
         set: (val) => {
           state[key] = val
-          this.observers[key]()
-          
+          //this.observers[key]()
+          this.observers[key].forEach(observer => observer(val))
         }
       })
     }
   }
   subscribe(key, cb) {
-    this.observers[key] = cb
+    // this.observers['message'] = () => {}
+    // { message: () => {} }
+    // { message: [() => {}, () => {}, () => {} ...] }
+    // { message: [ cb1, cb2, cb3 ...] }
+    Array.isArray(this.observers[key])
+      ? this.observers[key].push(cb)
+      : this.observers[key] = [cb]
   }
 }
 ```
 
-## components/Message.js
+## components/Title.js
 ```javascript
 import { Component } from "../core/core";
 import messageStore from "../store/message";
 
-export default class Message extends Component{
+export default class Title extends Component {
   constructor(){
-    super()
-    messageStore.subscribe('message', () => {
+    super({
+      tagName: 'h1'
+    })
+    messageStore.subscribe('message', (val) => {
+      console.log(`Title : ${val}`);
       this.render()
     })
   }
   render(){
-    this.el.innerHTML = /*HTML*/`
-      <h2>${messageStore.state.message}</h2>
-    `
-  }
-}
-```
-## components/TextField.js
-```javascript
-import { Component } from "../core/core";
-import messageStore from "../store/message";
-
-export default class TextField extends Component{
-  render(){
-    this.el.innerHTML = /*html*/`
-      <input value="${messageStore.state.message}"> 
-    `
-    const inputEl = this.el.querySelector('input')
-    inputEl.addEventListener('input', () => {
-      //console.log(inputEl.value);
-      messageStore.state.message = inputEl.value // set
-    })
+    this.el.textContent = `Title : ${messageStore.state.message} `
   }
 }
 ```
@@ -80,6 +60,7 @@ export default class TextField extends Component{
 import { Component } from "../core/core";
 import TextField from "../components/TextField";
 import Message from "../components/Message";
+import Title from "../components/Title";
 
 export default class Home extends Component{
   render(){
@@ -87,8 +68,9 @@ export default class Home extends Component{
       <h1>Home Page!</h1>
     `
     this.el.append( 
-      new TextField().el
-      ,new Message().el 
+        new TextField().el
+      , new Message().el 
+      , new Title().el
     )
   
   }
