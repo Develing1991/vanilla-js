@@ -77,4 +77,5 @@ export default class Home extends Component{
 }
 ```
 
+<img src="https://user-images.githubusercontent.com/54789601/208788011-894bb810-1add-46f3-83d4-d7a5bbe6269c.png">
 
